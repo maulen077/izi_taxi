@@ -52,16 +52,24 @@
 <script src="{{ asset('admin/admin.js') }}"></script>
 <script>
     const sidebarToggle = document.getElementById('adminSidebarToggle');
+    const mobileSidebarBreakpoint = 991;
 
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function (event) {
             event.preventDefault();
-            document.body.classList.toggle('admin-sidebar-open');
+
+            if (window.innerWidth <= mobileSidebarBreakpoint) {
+                document.body.classList.toggle('admin-sidebar-open');
+                document.body.classList.remove('admin-sidebar-collapsed');
+                return;
+            }
+
+            document.body.classList.toggle('admin-sidebar-collapsed');
         });
     }
 
     document.addEventListener('click', function (event) {
-        if (window.innerWidth > 991) {
+        if (window.innerWidth > mobileSidebarBreakpoint) {
             return;
         }
 
@@ -71,6 +79,14 @@
 
         if (!clickedInsideSidebar && !clickedToggle) {
             document.body.classList.remove('admin-sidebar-open');
+        }
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > mobileSidebarBreakpoint) {
+            document.body.classList.remove('admin-sidebar-open');
+        } else {
+            document.body.classList.remove('admin-sidebar-collapsed');
         }
     });
 

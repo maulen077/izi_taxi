@@ -1,51 +1,31 @@
 @extends('admin.layouts.admin')
 
 @section('content')
+    @php
+        $orderRoutePrefix = str_starts_with(request()->route()?->getName() ?? '', 'dispatcher.') ? 'dispatcher' : 'admin';
+        $shouldOpenCreateModal =
+            $errors->has('contact_phone') ||
+            $errors->has('passenger_name') ||
+            $errors->has('pickup_address') ||
+            $errors->has('dropoff_address') ||
+            $errors->has('price') ||
+            $errors->has('notes');
+    @endphp
+
     <div class="admin-page">
         <div class="page-header">
             <div>
                 <h1>Заказы</h1>
-                <p>История заказов, фильтр по дате и создание нового заказа.</p>
+                <p>История заказов и быстрое создание новой заявки через модальное окно.</p>
+            </div>
+            <div class="page-actions">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+                    Создать заказ
+                </button>
             </div>
         </div>
 
-        <div class="card form-card">
-            <h2 class="section-title">Создать заказ</h2>
-            <form method="POST" action="{{ route(str_starts_with(request()->route()?->getName() ?? '', 'dispatcher.') ? 'dispatcher.orders.store' : 'admin.orders.store') }}">
-                @csrf
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="contact_phone">Номер</label>
-                        <input id="contact_phone" name="contact_phone" type="text" placeholder="7771234567" value="{{ old('contact_phone') }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="passenger_name">Имя клиента</label>
-                        <input id="passenger_name" name="passenger_name" type="text" value="{{ old('passenger_name') }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="pickup_address">Откуда</label>
-                        <input id="pickup_address" name="pickup_address" type="text" value="{{ old('pickup_address') }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="dropoff_address">Куда</label>
-                        <input id="dropoff_address" name="dropoff_address" type="text" value="{{ old('dropoff_address') }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="price">Цена</label>
-                        <input id="price" name="price" type="number" min="0" step="1" value="{{ old('price') }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="notes">Комментарий</label>
-                        <input id="notes" name="notes" type="text" value="{{ old('notes') }}">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Создать заказ</button>
-                </div>
-            </form>
-        </div>
-
-        <form method="GET" action="{{ str_starts_with(request()->route()?->getName() ?? '', 'dispatcher.') ? route('dispatcher.orders') : route('admin.orders') }}" class="card card-filter">
+        <form method="GET" action="{{ route($orderRoutePrefix . '.orders') }}" class="card card-filter">
             <div class="filter-grid">
                 <div class="form-group">
                     <label for="phone">Поиск по номеру</label>
@@ -62,7 +42,7 @@
             </div>
             <div class="filter-actions">
                 <button type="submit" class="btn btn-primary">Применить</button>
-                <a href="{{ str_starts_with(request()->route()?->getName() ?? '', 'dispatcher.') ? route('dispatcher.orders') : route('admin.orders') }}" class="btn btn-outline">Сбросить</a>
+                <a href="{{ route($orderRoutePrefix . '.orders') }}" class="btn btn-outline">Сбросить</a>
             </div>
         </form>
 
@@ -106,4 +86,70 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade admin-modal" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title" id="createOrderModalLabel">Создать заказ</h2>
+                        <p class="modal-subtitle">Заполните данные клиента и маршрут для новой заявки.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ route($orderRoutePrefix . '.orders.store') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="modal_contact_phone">Номер</label>
+                                <input id="modal_contact_phone" name="contact_phone" type="text" placeholder="7771234567" value="{{ old('contact_phone') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal_passenger_name">Имя клиента</label>
+                                <input id="modal_passenger_name" name="passenger_name" type="text" value="{{ old('passenger_name') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal_pickup_address">Откуда</label>
+                                <input id="modal_pickup_address" name="pickup_address" type="text" value="{{ old('pickup_address') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal_dropoff_address">Куда</label>
+                                <input id="modal_dropoff_address" name="dropoff_address" type="text" value="{{ old('dropoff_address') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal_price">Цена</label>
+                                <input id="modal_price" name="price" type="number" min="0" step="1" value="{{ old('price') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal_notes">Комментарий</label>
+                                <input id="modal_notes" name="notes" type="text" value="{{ old('notes') }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Создать заказ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('js_bottom')
+    @if($shouldOpenCreateModal)
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const createOrderModalElement = document.getElementById('createOrderModal');
+
+                if (!createOrderModalElement || typeof bootstrap === 'undefined') {
+                    return;
+                }
+
+                const createOrderModal = new bootstrap.Modal(createOrderModalElement);
+                createOrderModal.show();
+            });
+        </script>
+    @endif
 @endsection
