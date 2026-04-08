@@ -93,7 +93,11 @@ class PassengerService
             'tariff' => $tariff,
             'status' => RideStatus::Searching,
             'pickup_address' => $data['pickup'] ?? 'Текущее местоположение',
+            'pickup_lat' => $data['pickup_lat'] ?? null,
+            'pickup_lng' => $data['pickup_lng'] ?? null,
             'destination_address' => ($data['skip_destination'] ?? false) ? null : ($data['destination'] ?? null),
+            'destination_lat' => ($data['skip_destination'] ?? false) ? null : ($data['destination_lat'] ?? null),
+            'destination_lng' => ($data['skip_destination'] ?? false) ? null : ($data['destination_lng'] ?? null),
             'price' => $basePrice,
             'base_price' => $basePrice,
             'distance_km' => $distance,
@@ -121,6 +125,20 @@ class PassengerService
 
         return [
             'ride' => $this->mobileDataService->serializeRide($ride->loadMissing(['passenger', 'driver.driverProfile'])),
+        ];
+    }
+
+    public function trackRide(User $user, Ride $ride): array
+    {
+        if ($ride->passenger_id !== $user->id) {
+            throw ValidationException::withMessages([
+                'ride' => 'Ride not found.',
+            ]);
+        }
+
+        return [
+            'ride' => $this->mobileDataService->serializeRide($ride->loadMissing(['passenger', 'driver.driverProfile', 'driver.currentLocation'])),
+            'tracking' => $this->mobileDataService->serializeRideTracking($ride),
         ];
     }
 

@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/history', [PassengerController::class, 'history']);
         Route::post('/rides', [PassengerController::class, 'store']);
         Route::get('/rides/{ride}', [PassengerController::class, 'show']);
+        Route::get('/rides/{ride}/tracking', [PassengerController::class, 'tracking']);
         Route::post('/rides/{ride}/rating', [PassengerController::class, 'rate']);
     });
 
@@ -38,7 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/home', [DriverController::class, 'home']);
         Route::get('/history', [DriverController::class, 'history']);
         Route::post('/status', [DriverController::class, 'status']);
+        Route::post('/location', [DriverController::class, 'location']);
         Route::put('/profile', [DriverController::class, 'profile']);
+        Route::get('/rides/{ride}/tracking', [DriverController::class, 'tracking']);
         Route::post('/rides/{ride}/accept', [DriverController::class, 'accept']);
         Route::post('/rides/{ride}/reject', [DriverController::class, 'reject']);
         Route::post('/rides/{ride}/arrived', [DriverController::class, 'arrived']);

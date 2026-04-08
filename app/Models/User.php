@@ -50,6 +50,11 @@ class User extends Authenticatable
         return $this->hasOne(DriverProfile::class);
     }
 
+    public function currentLocation(): HasOne
+    {
+        return $this->hasOne(DriverLocation::class);
+    }
+
     public function ridesAsPassenger(): HasMany
     {
         return $this->hasMany(Ride::class, 'passenger_id');

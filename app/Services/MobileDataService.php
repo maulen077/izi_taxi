@@ -177,7 +177,7 @@ class MobileDataService
 
     public function serializeRide(Ride $ride): array
     {
-        $ride->loadMissing(['passenger.driverProfile', 'driver.driverProfile']);
+        $ride->loadMissing(['passenger.driverProfile', 'driver.driverProfile', 'driver.currentLocation']);
 
         $passenger = $ride->passenger;
         $driver = $ride->driver;
@@ -189,7 +189,13 @@ class MobileDataService
             'status' => $ride->status instanceof RideStatus ? $ride->status->value : (string) $ride->status,
             'status_label' => $ride->status instanceof RideStatus ? $ride->status->passengerLabel() : (string) $ride->status,
             'pickup' => $ride->pickup_address,
+            'pickup_location' => $this->serializePoint($ride->pickup_lat, $ride->pickup_lng, [
+                'address' => $ride->pickup_address,
+            ]),
             'destination' => $ride->destination_address,
+            'destination_location' => $this->serializePoint($ride->destination_lat, $ride->destination_lng, [
+                'address' => $ride->destination_address,
+            ]),
             'price' => $ride->price,
             'base_price' => $ride->base_price,
             'distance' => (float) $ride->distance_km,
@@ -217,12 +223,52 @@ class MobileDataService
                 'rating' => $driver->trust_score,
                 'car' => $driver->driverProfile ? trim(($driver->driverProfile->car_brand ?? '') . ' ' . ($driver->driverProfile->car_model ?? '')) : null,
                 'plate' => $driver->driverProfile?->car_number,
+                'location' => $driver->currentLocation ? $this->serializeDriverLocation($driver) : null,
             ] : null,
             'accepted_at' => optional($ride->accepted_at)?->toIso8601String(),
             'arrived_at' => optional($ride->arrived_at)?->toIso8601String(),
             'started_at' => optional($ride->started_at)?->toIso8601String(),
             'completed_at' => optional($ride->completed_at)?->toIso8601String(),
             'created_at' => optional($ride->created_at)?->toIso8601String(),
+        ];
+    }
+
+    public function serializeDriverLocation(User $driver): ?array
+    {
+        $driver->loadMissing('currentLocation');
+        $location = $driver->currentLocation;
+
+        if (! $location) {
+            return null;
+        }
+
+        return $this->serializePoint($location->lat, $location->lng, [
+            'heading' => $location->heading !== null ? (float) $location->heading : null,
+            'accuracy' => $location->accuracy !== null ? (float) $location->accuracy : null,
+            'updated_at' => optional($location->updated_at)?->toIso8601String(),
+        ]);
+    }
+
+    public function serializeRideTracking(Ride $ride): array
+    {
+        $ride->loadMissing(['driver.currentLocation', 'driver.driverProfile', 'passenger']);
+
+        $status = $ride->status instanceof RideStatus ? $ride->status : RideStatus::tryFrom((string) $ride->status);
+        $pickup = $this->serializePoint($ride->pickup_lat, $ride->pickup_lng, [
+            'address' => $ride->pickup_address,
+        ]);
+        $destination = $this->serializePoint($ride->destination_lat, $ride->destination_lng, [
+            'address' => $ride->destination_address,
+        ]);
+        $driver = $ride->driver ? $this->serializeDriverLocation($ride->driver) : null;
+
+        return [
+            'ride_id' => $ride->id,
+            'status' => $status?->value ?? (string) $ride->status,
+            'pickup' => $pickup,
+            'destination' => $destination,
+            'driver' => $driver,
+            'route_points' => $this->buildRideRoutePoints($status, $pickup, $destination, $driver),
         ];
     }
 
@@ -274,6 +320,58 @@ class MobileDataService
             'submitted_at' => optional($application->submitted_at)?->toIso8601String(),
             'reviewed_at' => optional($application->reviewed_at)?->toIso8601String(),
             'notes' => $application->notes,
+        ];
+    }
+
+    private function serializePoint(float|string|null $lat, float|string|null $lng, array $extra = []): ?array
+    {
+        if ($lat === null || $lng === null) {
+            return null;
+        }
+
+        return array_merge([
+            'lat' => (float) $lat,
+            'lng' => (float) $lng,
+        ], $extra);
+    }
+
+    private function buildRideRoutePoints(?RideStatus $status, ?array $pickup, ?array $destination, ?array $driver): array
+    {
+        $points = [];
+
+        if ($status === RideStatus::PickedUp || $status === RideStatus::InProgress || $status === RideStatus::Completed) {
+            if ($driver) {
+                $points[] = $this->routePoint($driver);
+            }
+            if ($destination) {
+                $points[] = $this->routePoint($destination);
+            }
+
+            return array_values(array_filter($points));
+        }
+
+        if ($driver) {
+            $points[] = $this->routePoint($driver);
+        }
+        if ($pickup) {
+            $points[] = $this->routePoint($pickup);
+        }
+        if ($destination) {
+            $points[] = $this->routePoint($destination);
+        }
+
+        return array_values(array_filter($points));
+    }
+
+    private function routePoint(?array $point): ?array
+    {
+        if (! $point || ! isset($point['lat'], $point['lng'])) {
+            return null;
+        }
+
+        return [
+            'lat' => (float) $point['lat'],
+            'lng' => (float) $point['lng'],
         ];
     }
 }

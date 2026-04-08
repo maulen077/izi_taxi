@@ -37,7 +37,11 @@ class PassengerController extends Controller
             'order_mode' => ['nullable', 'in:taxi,delivery'],
             'tariff' => ['nullable', 'in:economy,comfort,business,minivan'],
             'pickup' => ['nullable', 'string', 'max:255'],
+            'pickup_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'pickup_lng' => ['nullable', 'numeric', 'between:-180,180'],
             'destination' => ['nullable', 'string', 'max:255'],
+            'destination_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'destination_lng' => ['nullable', 'numeric', 'between:-180,180'],
             'skip_destination' => ['nullable', 'boolean'],
             'distance_km' => ['nullable', 'numeric', 'min:0'],
             'duration_minutes' => ['nullable', 'integer', 'min:0'],
@@ -59,6 +63,14 @@ class PassengerController extends Controller
         return response()->json([
             'success' => true,
             'data' => $this->passengerService->showRide($request->user(), $ride),
+        ]);
+    }
+
+    public function tracking(Request $request, Ride $ride): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->passengerService->trackRide($request->user(), $ride),
         ]);
     }
 

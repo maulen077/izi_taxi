@@ -70,6 +70,21 @@ class DriverController extends Controller
         ]);
     }
 
+    public function location(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+            'heading' => ['nullable', 'numeric', 'between:0,360'],
+            'accuracy' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->driverService->updateLocation($request->user(), $validated),
+        ]);
+    }
+
     public function accept(Request $request, Ride $ride): JsonResponse
     {
         return response()->json([
@@ -107,6 +122,14 @@ class DriverController extends Controller
         return response()->json([
             'success' => true,
             'data' => $this->driverService->completeRide($request->user(), $ride),
+        ]);
+    }
+
+    public function tracking(Request $request, Ride $ride): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->driverService->trackRide($request->user(), $ride),
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DriverStatus;
 use App\Enums\RideStatus;
 use App\Enums\UserRole;
+use App\Models\DriverLocation;
 use App\Models\DriverProfile;
 use App\Models\Ride;
 use App\Models\User;
@@ -138,6 +139,30 @@ class DriverService
         ];
     }
 
+    public function updateLocation(User $user, array $data): array
+    {
+        if (! $user->role instanceof UserRole || $user->role !== UserRole::Driver) {
+            throw ValidationException::withMessages([
+                'role' => 'Driver role required.',
+            ]);
+        }
+
+        $location = DriverLocation::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'lat' => $data['lat'],
+                'lng' => $data['lng'],
+                'heading' => $data['heading'] ?? null,
+                'accuracy' => $data['accuracy'] ?? null,
+            ]
+        );
+
+        return [
+            'location' => $this->mobileDataService->serializeDriverLocation($user->fresh('currentLocation')),
+            'updated_at' => optional($location->updated_at)?->toIso8601String(),
+        ];
+    }
+
     public function acceptRide(User $user, Ride $ride): array
     {
         $this->guardRideBelongsToDriverQueue($ride);
@@ -213,6 +238,23 @@ class DriverService
         ])->save();
 
         return $this->rideResponse($ride);
+    }
+
+    public function trackRide(User $user, Ride $ride): array
+    {
+        if (
+            (int) $ride->driver_id !== (int) $user->id
+            && $ride->status !== RideStatus::Searching
+        ) {
+            throw ValidationException::withMessages([
+                'ride' => 'Ride not assigned to this driver.',
+            ]);
+        }
+
+        return [
+            'ride' => $this->mobileDataService->serializeRide($ride->loadMissing(['passenger', 'driver.driverProfile', 'driver.currentLocation'])),
+            'tracking' => $this->mobileDataService->serializeRideTracking($ride),
+        ];
     }
 
     private function guardRideBelongsToDriverQueue(Ride $ride): void
