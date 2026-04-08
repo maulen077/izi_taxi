@@ -65,6 +65,7 @@
             }
 
             document.body.classList.toggle('admin-sidebar-collapsed');
+            document.body.classList.remove('admin-sidebar-open');
         });
     }
 

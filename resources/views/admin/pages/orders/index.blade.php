@@ -19,7 +19,7 @@
                 <p>История заказов и быстрое создание новой заявки через модальное окно.</p>
             </div>
             <div class="page-actions">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createOrderModal">
                     Создать заказ
                 </button>
             </div>
@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    <div class="modal fade admin-modal" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
+    <div class="modal fade admin-modal" id="createOrderModal" tabindex="-1" role="dialog" aria-labelledby="createOrderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -95,7 +95,9 @@
                         <h2 class="modal-title" id="createOrderModalLabel">Создать заказ</h2>
                         <p class="modal-subtitle">Заполните данные клиента и маршрут для новой заявки.</p>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <form method="POST" action="{{ route($orderRoutePrefix . '.orders.store') }}">
                     @csrf
@@ -128,7 +130,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-outline" data-dismiss="modal">Отмена</button>
                         <button type="submit" class="btn btn-primary">Создать заказ</button>
                     </div>
                 </form>
@@ -143,12 +145,19 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const createOrderModalElement = document.getElementById('createOrderModal');
 
-                if (!createOrderModalElement || typeof bootstrap === 'undefined') {
+                if (!createOrderModalElement) {
                     return;
                 }
 
-                const createOrderModal = new bootstrap.Modal(createOrderModalElement);
-                createOrderModal.show();
+                if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+                    window.jQuery(createOrderModalElement).modal('show');
+                    return;
+                }
+
+                if (typeof bootstrap !== 'undefined' && typeof bootstrap.Modal === 'function') {
+                    const createOrderModal = new bootstrap.Modal(createOrderModalElement);
+                    createOrderModal.show();
+                }
             });
         </script>
     @endif

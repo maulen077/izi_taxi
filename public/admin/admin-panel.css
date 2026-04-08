@@ -61,6 +61,7 @@ a {
     flex-direction: column;
     gap: 28px;
     box-shadow: 16px 0 40px rgba(15, 23, 42, 0.14);
+    transition: transform 0.24s ease, visibility 0.24s ease, opacity 0.24s ease;
 }
 
 .sidebar-brand {
@@ -133,7 +134,7 @@ a {
     flex: 0 0 18px;
 }
 
-.main-header {
+body.admin-shell .main-header {
     margin-left: var(--admin-sidebar-width);
     min-height: 80px;
     padding: 0 28px;
@@ -147,6 +148,7 @@ a {
     position: sticky;
     top: 0;
     z-index: 1020;
+    transition: margin-left 0.24s ease, width 0.24s ease;
 }
 
 .main-header .navbar-nav {
@@ -170,19 +172,24 @@ a {
     color: #111827;
 }
 
-.content-wrapper {
+body.admin-shell .content-wrapper {
     margin-left: var(--admin-sidebar-width);
     min-height: calc(100vh - 80px);
     background: transparent;
+    transition: margin-left 0.24s ease, width 0.24s ease;
 }
 
 body.admin-sidebar-collapsed .admin-sidebar {
-    transform: translateX(-100%);
+    transform: translateX(calc(-1 * var(--admin-sidebar-width) - 32px));
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 body.admin-sidebar-collapsed .main-header,
 body.admin-sidebar-collapsed .content-wrapper {
-    margin-left: 0;
+    margin-left: 0 !important;
+    width: 100%;
 }
 
 .content {
@@ -556,6 +563,22 @@ body.admin-sidebar-collapsed .content-wrapper {
     outline: none;
 }
 
+.admin-modal .close {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    color: var(--admin-text-muted);
+    font-size: 2rem;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.admin-modal .close:hover {
+    color: #111827;
+    opacity: 1;
+}
+
 @media (max-width: 991.98px) {
     .admin-sidebar {
         transform: translateX(-100%);
@@ -568,11 +591,14 @@ body.admin-sidebar-collapsed .content-wrapper {
 
     body.admin-sidebar-collapsed .admin-sidebar {
         transform: translateX(-100%);
+        visibility: hidden;
+        opacity: 0;
     }
 
     .main-header,
     .content-wrapper {
-        margin-left: 0;
+        margin-left: 0 !important;
+        width: 100%;
     }
 
     body.admin-sidebar-open::before {
