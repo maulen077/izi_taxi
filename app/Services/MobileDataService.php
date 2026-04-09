@@ -18,6 +18,13 @@ use App\Models\User;
 
 class MobileDataService
 {
+    /**
+     * Per-request cache for driver rating aggregates.
+     *
+     * @var array<int, array{average_rating: ?float, ratings_count: int}>
+     */
+    private array $driverRatingCache = [];
+
     public function __construct(
         private readonly PricingSettingsService $pricingSettingsService,
     ) {
@@ -141,6 +148,7 @@ class MobileDataService
     public function serializeUser(User $user): array
     {
         $user->loadMissing(['driverProfile']);
+        $ratingStats = $this->driverRatingStats($user);
 
         return [
             'id' => $user->id,
@@ -153,6 +161,9 @@ class MobileDataService
             'driver_status' => $user->driver_status instanceof DriverStatus ? $user->driver_status->value : (string) $user->driver_status,
             'balance' => $user->balance,
             'trust_score' => $user->trust_score,
+            'reliability_score' => $user->trust_score,
+            'average_rating' => $ratingStats['average_rating'],
+            'ratings_count' => $ratingStats['ratings_count'],
             'avatar_url' => $user->avatar_url,
             'driver_profile' => $user->driverProfile ? $this->serializeDriverProfile($user->driverProfile) : null,
         ];
@@ -194,6 +205,7 @@ class MobileDataService
 
         $passenger = $ride->passenger;
         $driver = $ride->driver;
+        $driverRatingStats = $driver ? $this->driverRatingStats($driver) : ['average_rating' => null, 'ratings_count' => 0];
 
         return [
             'id' => $ride->id,
@@ -233,7 +245,9 @@ class MobileDataService
                 'name' => $driver->name,
                 'phone' => $driver->phone,
                 'formatted_phone' => $this->formatPhone($driver->phone),
-                'rating' => $driver->trust_score,
+                'rating' => $driverRatingStats['average_rating'],
+                'reliability_score' => $driver->trust_score,
+                'ratings_count' => $driverRatingStats['ratings_count'],
                 'car' => $driver->driverProfile ? trim(($driver->driverProfile->car_brand ?? '') . ' ' . ($driver->driverProfile->car_model ?? '')) : null,
                 'plate' => $driver->driverProfile?->car_number,
                 'location' => $driver->currentLocation ? $this->serializeDriverLocation($driver) : null,
@@ -385,6 +399,31 @@ class MobileDataService
         return [
             'lat' => (float) $point['lat'],
             'lng' => (float) $point['lng'],
+        ];
+    }
+
+    private function driverRatingStats(User $user): array
+    {
+        if (($user->role instanceof UserRole ? $user->role : UserRole::tryFrom((string) $user->role)) !== UserRole::Driver) {
+            return [
+                'average_rating' => null,
+                'ratings_count' => 0,
+            ];
+        }
+
+        if (isset($this->driverRatingCache[$user->id])) {
+            return $this->driverRatingCache[$user->id];
+        }
+
+        $stats = Ride::query()
+            ->where('driver_id', $user->id)
+            ->whereNotNull('passenger_rating')
+            ->selectRaw('AVG(passenger_rating) as average_rating, COUNT(*) as ratings_count')
+            ->first();
+
+        return $this->driverRatingCache[$user->id] = [
+            'average_rating' => $stats?->average_rating !== null ? round((float) $stats->average_rating, 1) : null,
+            'ratings_count' => (int) ($stats?->ratings_count ?? 0),
         ];
     }
 }

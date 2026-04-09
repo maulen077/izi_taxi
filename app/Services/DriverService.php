@@ -179,10 +179,7 @@ class DriverService
     {
         $this->guardRideBelongsToDriverQueue($user, $ride);
 
-        $user->forceFill([
-            'trust_score' => max(0, $user->trust_score - 5),
-            'driver_status' => DriverStatus::Online,
-        ])->save();
+        $this->applyReliabilityPenalty($user);
 
         $ride->forceFill([
             'status' => RideStatus::Searching,
@@ -283,6 +280,45 @@ class DriverService
         return [
             'ride' => $this->mobileDataService->serializeRide($ride->fresh(['passenger', 'driver.driverProfile'])),
         ];
+    }
+
+    private function applyReliabilityPenalty(User $user): void
+    {
+        $newScore = max(10, ((int) $user->trust_score) - 10);
+
+        $user->forceFill([
+            'trust_score' => $newScore,
+            'driver_status' => DriverStatus::Online,
+        ])->save();
+
+        if ($newScore < 50) {
+            $this->downgradeDriverTariff($user);
+        }
+    }
+
+    private function downgradeDriverTariff(User $user): void
+    {
+        $profile = $user->driverProfile()->first();
+
+        if (! $profile) {
+            return;
+        }
+
+        $currentTariff = $profile->car_tariff instanceof TariffType
+            ? $profile->car_tariff
+            : TariffType::tryFrom((string) $profile->car_tariff);
+
+        $downgradedTariff = match ($currentTariff) {
+            TariffType::Business => TariffType::Comfort,
+            TariffType::Comfort => TariffType::Economy,
+            default => null,
+        };
+
+        if ($downgradedTariff) {
+            $profile->forceFill([
+                'car_tariff' => $downgradedTariff,
+            ])->save();
+        }
     }
 
     private function applyRideEligibilityFilter($query, User $user): void

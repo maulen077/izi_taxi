@@ -38,11 +38,18 @@ class DriverController extends Controller
             ->latest()
             ->limit(10)
             ->get();
+        $ratingSummary = Ride::query()
+            ->where('driver_id', $user->id)
+            ->whereNotNull('passenger_rating')
+            ->selectRaw('AVG(passenger_rating) as average_rating, COUNT(*) as ratings_count')
+            ->first();
 
         return view('admin.pages.drivers.detail', [
             'user' => $user,
             'ridesAsDriver' => $ridesAsDriver,
             'tariffOptions' => TariffType::cases(),
+            'averageRating' => $ratingSummary?->average_rating !== null ? round((float) $ratingSummary->average_rating, 1) : null,
+            'ratingsCount' => (int) ($ratingSummary?->ratings_count ?? 0),
         ]);
     }
 
@@ -88,7 +95,7 @@ class DriverController extends Controller
             'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'driver_status' => ['nullable', 'string', Rule::in(array_map(fn (DriverStatus $status) => $status->value, DriverStatus::cases()))],
             'balance' => ['nullable', 'numeric'],
-            'trust_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'trust_score' => ['nullable', 'numeric', 'min:10', 'max:100'],
             'avatar_url' => ['nullable', 'url'],
             'password' => ['nullable', 'string', 'min:6'],
             'driver_first_name' => ['nullable', 'string', 'max:255'],

@@ -61,7 +61,9 @@
                 <div><div class="profile-label">Тариф машины</div><div class="profile-value">{{ $profile?->car_tariff?->value ?? $profile?->car_tariff ?? '-' }}</div></div>
                 <div><div class="profile-label">Доставка</div><div class="profile-value">{{ ($profile?->accepts_delivery ?? true) ? 'Включена' : 'Отключена' }}</div></div>
                 <div><div class="profile-label">Статус</div><div class="profile-value">{{ $user->driver_status?->value ?? $user->driver_status ?? '-' }}</div></div>
-                <div><div class="profile-label">Рейтинг</div><div class="profile-value">{{ $user->trust_score ?? 0 }}</div></div>
+                <div><div class="profile-label">Рейтинг надежности</div><div class="profile-value">{{ $user->trust_score ?? 100 }}</div></div>
+                <div><div class="profile-label">Средний рейтинг</div><div class="profile-value">{{ $averageRating !== null ? number_format((float) $averageRating, 1, '.', ' ') . ' / 5' : 'Нет оценок' }}</div></div>
+                <div><div class="profile-label">Количество оценок</div><div class="profile-value">{{ $ratingsCount }}</div></div>
                 <div><div class="profile-label">Баланс</div><div class="profile-value">{{ number_format((float) $user->balance, 0, '.', ' ') }}</div></div>
                 <div><div class="profile-label">Статус заявки</div><div class="profile-value">{{ $profile?->application_status?->value ?? $profile?->application_status ?? '-' }}</div></div>
                 <div><div class="profile-label">Дата подачи</div><div class="profile-value">{{ optional($profile?->submitted_at)->format('d.m.Y H:i') ?? '-' }}</div></div>

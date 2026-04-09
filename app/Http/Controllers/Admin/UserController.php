@@ -55,7 +55,7 @@ class UserController extends Controller
             'language' => ['nullable', 'string', 'max:10'],
             'driver_status' => ['nullable', 'string', Rule::in(array_map(fn (DriverStatus $status) => $status->value, DriverStatus::cases()))],
             'balance' => ['nullable', 'numeric'],
-            'trust_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'trust_score' => ['nullable', 'numeric', 'min:10', 'max:100'],
             'avatar_url' => ['nullable', 'url'],
             'password' => ['nullable', 'string', 'min:6'],
             'driver_first_name' => ['nullable', 'string', 'max:255'],

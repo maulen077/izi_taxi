@@ -156,12 +156,6 @@ class PassengerService
             'comment' => $data['comment'] ?? null,
         ])->save();
 
-        if ($ride->driver_id) {
-            $ride->driver->forceFill([
-                'trust_score' => min(100, ($ride->driver->trust_score ?? 0) + max(0, (int) ($data['rating'] ?? 0))),
-            ])->save();
-        }
-
         return [
             'ride' => $this->mobileDataService->serializeRide($ride->fresh(['passenger', 'driver.driverProfile'])),
         ];

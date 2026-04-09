@@ -43,8 +43,8 @@
                     <input id="balance" name="balance" type="number" step="1" value="{{ old('balance', $user->balance) }}">
                 </div>
                 <div class="form-group">
-                    <label for="trust_score">Trust score</label>
-                    <input id="trust_score" name="trust_score" type="number" step="1" min="0" max="100" value="{{ old('trust_score', $user->trust_score) }}">
+                    <label for="trust_score">Рейтинг надежности</label>
+                    <input id="trust_score" name="trust_score" type="number" step="1" min="10" max="100" value="{{ old('trust_score', $user->trust_score) }}">
                 </div>
             </div>
 

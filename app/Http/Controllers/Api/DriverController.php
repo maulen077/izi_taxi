@@ -51,7 +51,7 @@ class DriverController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'password' => ['nullable', 'string', 'min:6'],
             'balance' => ['nullable', 'integer', 'min:0'],
-            'trust_score' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'trust_score' => ['nullable', 'integer', 'min:10', 'max:100'],
             'first_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
             'car_brand' => ['nullable', 'string', 'max:255'],
