@@ -15,6 +15,7 @@ class PassengerService
 {
     public function __construct(
         private readonly MobileDataService $mobileDataService,
+        private readonly PricingSettingsService $pricingSettingsService,
     ) {
     }
 
@@ -168,15 +169,19 @@ class PassengerService
 
     private function calculatePrice(OrderMode $mode, TariffType $tariff, float $distance): int
     {
+        $rates = $this->pricingSettingsService->all();
+
         if ($mode === OrderMode::Delivery) {
-            return (int) round($distance * 200);
+            return (int) round($distance * $rates[PricingSettingsService::DELIVERY_RATE_PER_KM]);
         }
 
-        return match ($tariff) {
+        $basePrice = match ($tariff) {
             TariffType::Economy => 1200,
             TariffType::Comfort => 1600,
             TariffType::Business => 2500,
             TariffType::Minivan => 2000,
         };
+
+        return $basePrice + (int) round($distance * $rates[PricingSettingsService::TAXI_RATE_PER_KM]);
     }
 }

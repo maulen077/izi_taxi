@@ -42,6 +42,10 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14H4V5a2 2 0 0 1 2-2zm2 4v2h8V7H8zm0 4v2h8v-2H8z" fill="currentColor"/></svg>
                 <span>Заказы</span>
             </a>
+            <a href="{{ route('admin.pricing') }}" class="sidebar-link {{ request()->routeIs('admin.pricing*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l7 4v6c0 5-3.06 9.52-7 10-3.94-.48-7-5-7-10V6l7-4zm1 6h-2v3H8v2h3v3h2v-3h3v-2h-3V8z" fill="currentColor"/></svg>
+                <span>Тарифы</span>
+            </a>
             <a href="{{ route('admin.support') }}" class="sidebar-link {{ request()->routeIs('admin.support*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-9 9v4a3 3 0 0 0 3 3h1v-7H5v-1a7 7 0 0 1 14 0v1h-2v7h1a3 3 0 0 0 3-3v-4a9 9 0 0 0-9-9z" fill="currentColor"/></svg>
                 <span>Техподдержка</span>

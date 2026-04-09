@@ -18,6 +18,11 @@ use App\Models\User;
 
 class MobileDataService
 {
+    public function __construct(
+        private readonly PricingSettingsService $pricingSettingsService,
+    ) {
+    }
+
     public function normalizePhone(?string $phone): string
     {
         return preg_replace('/\D+/', '', (string) $phone) ?? '';
@@ -52,12 +57,16 @@ class MobileDataService
 
     public function tariffs(): array
     {
+        $taxiRatePerKm = $this->pricingSettingsService->taxiRatePerKm();
+        $deliveryRatePerKm = $this->pricingSettingsService->deliveryRatePerKm();
+
         return [
             TariffType::Economy->value => [
                 'name' => 'Эконом',
                 'mode' => OrderMode::Taxi->value,
                 'base_price' => 1200,
-                'delivery_rate_per_km' => 200,
+                'taxi_rate_per_km' => $taxiRatePerKm,
+                'delivery_rate_per_km' => $deliveryRatePerKm,
                 'time' => 2,
                 'seats' => 4,
                 'emoji' => '🚗',
@@ -66,7 +75,8 @@ class MobileDataService
                 'name' => 'Комфорт',
                 'mode' => OrderMode::Taxi->value,
                 'base_price' => 1600,
-                'delivery_rate_per_km' => 200,
+                'taxi_rate_per_km' => $taxiRatePerKm,
+                'delivery_rate_per_km' => $deliveryRatePerKm,
                 'time' => 2,
                 'seats' => 4,
                 'emoji' => '🚙',
@@ -75,7 +85,8 @@ class MobileDataService
                 'name' => 'Бизнес',
                 'mode' => OrderMode::Taxi->value,
                 'base_price' => 2500,
-                'delivery_rate_per_km' => 200,
+                'taxi_rate_per_km' => $taxiRatePerKm,
+                'delivery_rate_per_km' => $deliveryRatePerKm,
                 'time' => 3,
                 'seats' => 4,
                 'emoji' => '🚘',
@@ -84,7 +95,8 @@ class MobileDataService
                 'name' => 'Минивэн',
                 'mode' => OrderMode::Taxi->value,
                 'base_price' => 2000,
-                'delivery_rate_per_km' => 200,
+                'taxi_rate_per_km' => $taxiRatePerKm,
+                'delivery_rate_per_km' => $deliveryRatePerKm,
                 'time' => 3,
                 'seats' => 7,
                 'emoji' => '🚐',

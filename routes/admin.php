@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PricingController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('orders');
         Route::get('orders/create', [OrderController::class, 'create'])->name('orders.create');
         Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
+
+        Route::get('pricing', [PricingController::class, 'index'])->name('pricing');
+        Route::put('pricing', [PricingController::class, 'update'])->name('pricing.update');
 
         Route::get('support', [SupportController::class, 'index'])->name('support');
     });
