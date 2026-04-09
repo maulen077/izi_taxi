@@ -33,8 +33,8 @@
                 <div class="form-group">
                     <label for="driver_status">Статус</label>
                     <select id="driver_status" name="driver_status">
-                        @foreach(['offline','online','order-received','en-route-to-pickup','passenger-waiting','in-progress'] as $status)
-                            <option value="{{ $status }}" @selected(old('driver_status', $user->driver_status?->value ?? $user->driver_status) === $status)>{{ $status }}</option>
+                        @foreach(\App\Enums\DriverStatus::cases() as $status)
+                            <option value="{{ $status->value }}" @selected(old('driver_status', $user->driver_status?->value ?? $user->driver_status) === $status->value)>{{ $status->label() }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -83,7 +83,7 @@
                     <select id="car_tariff" name="car_tariff">
                         @foreach($tariffOptions as $tariff)
                             <option value="{{ $tariff->value }}" @selected(old('car_tariff', $user->driverProfile?->car_tariff?->value ?? $user->driverProfile?->car_tariff ?? 'economy') === $tariff->value)>
-                                {{ ucfirst($tariff->value) }}
+                                {{ $tariff->label() }}
                             </option>
                         @endforeach
                     </select>

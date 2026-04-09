@@ -37,7 +37,7 @@
                 </div>
                 <div>
                     <div class="profile-label">Статус водителя</div>
-                    <div class="profile-value">{{ $user->driver_status?->value ?? $user->driver_status ?? '-' }}</div>
+                    <div class="profile-value">{{ $user->driver_status?->label() ?? $user->driver_status ?? '-' }}</div>
                 </div>
                 <div>
                     <div class="profile-label">Баланс</div>
@@ -82,7 +82,7 @@
                         @forelse($ridesAsPassenger as $ride)
                             <tr>
                                 <td>#{{ $ride->id }}</td>
-                                <td>{{ $ride->status?->value ?? $ride->status }}</td>
+                                <td>{{ $ride->status?->label() ?? $ride->status }}</td>
                                 <td>{{ $ride->pickup_address }} -> {{ $ride->dropoff_address }}</td>
                                 <td>{{ number_format((float) $ride->price, 0, '.', ' ') }}</td>
                                 <td>{{ $ride->created_at?->format('d.m.Y H:i') }}</td>
@@ -112,7 +112,7 @@
                         @forelse($ridesAsDriver as $ride)
                             <tr>
                                 <td>#{{ $ride->id }}</td>
-                                <td>{{ $ride->status?->value ?? $ride->status }}</td>
+                                <td>{{ $ride->status?->label() ?? $ride->status }}</td>
                                 <td>{{ $ride->pickup_address }} -> {{ $ride->dropoff_address }}</td>
                                 <td>{{ number_format((float) $ride->price, 0, '.', ' ') }}</td>
                                 <td>{{ $ride->created_at?->format('d.m.Y H:i') }}</td>

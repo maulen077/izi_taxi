@@ -48,10 +48,10 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="driver_status">Driver status</label>
+                    <label for="driver_status">Статус водителя</label>
                     <select id="driver_status" name="driver_status">
-                        @foreach(['offline','online','order-received','en-route-to-pickup','passenger-waiting','in-progress'] as $status)
-                            <option value="{{ $status }}" @selected(old('driver_status', $user->driver_status?->value ?? $user->driver_status) === $status)>{{ $status }}</option>
+                        @foreach(\App\Enums\DriverStatus::cases() as $status)
+                            <option value="{{ $status->value }}" @selected(old('driver_status', $user->driver_status?->value ?? $user->driver_status) === $status->value)>{{ $status->label() }}</option>
                         @endforeach
                     </select>
                 </div>

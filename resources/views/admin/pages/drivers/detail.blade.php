@@ -58,14 +58,14 @@
                 <div><div class="profile-label">Год</div><div class="profile-value">{{ $profile?->car_year ?? '-' }}</div></div>
                 <div><div class="profile-label">Номер</div><div class="profile-value">{{ $profile?->car_number ?? '-' }}</div></div>
                 <div><div class="profile-label">Цвет</div><div class="profile-value">{{ $profile?->car_color ?? '-' }}</div></div>
-                <div><div class="profile-label">Тариф машины</div><div class="profile-value">{{ $profile?->car_tariff?->value ?? $profile?->car_tariff ?? '-' }}</div></div>
+                <div><div class="profile-label">Тариф машины</div><div class="profile-value">{{ $profile?->car_tariff?->label() ?? $profile?->car_tariff ?? '-' }}</div></div>
                 <div><div class="profile-label">Доставка</div><div class="profile-value">{{ ($profile?->accepts_delivery ?? true) ? 'Включена' : 'Отключена' }}</div></div>
-                <div><div class="profile-label">Статус</div><div class="profile-value">{{ $user->driver_status?->value ?? $user->driver_status ?? '-' }}</div></div>
+                <div><div class="profile-label">Статус</div><div class="profile-value">{{ $user->driver_status?->label() ?? $user->driver_status ?? '-' }}</div></div>
                 <div><div class="profile-label">Рейтинг надежности</div><div class="profile-value">{{ $user->trust_score ?? 100 }}</div></div>
                 <div><div class="profile-label">Средний рейтинг</div><div class="profile-value">{{ $averageRating !== null ? number_format((float) $averageRating, 1, '.', ' ') . ' / 5' : 'Нет оценок' }}</div></div>
                 <div><div class="profile-label">Количество оценок</div><div class="profile-value">{{ $ratingsCount }}</div></div>
                 <div><div class="profile-label">Баланс</div><div class="profile-value">{{ number_format((float) $user->balance, 0, '.', ' ') }}</div></div>
-                <div><div class="profile-label">Статус заявки</div><div class="profile-value">{{ $profile?->application_status?->value ?? $profile?->application_status ?? '-' }}</div></div>
+                <div><div class="profile-label">Статус заявки</div><div class="profile-value">{{ $profile?->application_status?->label() ?? $profile?->application_status ?? '-' }}</div></div>
                 <div><div class="profile-label">Дата подачи</div><div class="profile-value">{{ optional($profile?->submitted_at)->format('d.m.Y H:i') ?? '-' }}</div></div>
                 <div><div class="profile-label">Дата одобрения</div><div class="profile-value">{{ optional($profile?->approved_at)->format('d.m.Y H:i') ?? '-' }}</div></div>
                 <div><div class="profile-label">Заметки</div><div class="profile-value">{{ $profile?->notes ?? '-' }}</div></div>
@@ -83,7 +83,7 @@
                     <select id="car_tariff" name="car_tariff">
                         @foreach($tariffOptions as $tariff)
                             <option value="{{ $tariff->value }}" @selected(old('car_tariff', $profile?->car_tariff?->value ?? $profile?->car_tariff ?? 'economy') === $tariff->value)>
-                                {{ ucfirst($tariff->value) }}
+                                {{ $tariff->label() }}
                             </option>
                         @endforeach
                     </select>
@@ -166,7 +166,7 @@
                                 <td>{{ $ride->passenger?->phone ?? $ride->passenger?->name ?? '-' }}</td>
                                 <td>{{ $ride->pickup_address }} -> {{ $ride->destination_address ?? '-' }}</td>
                                 <td>{{ $ride->mode?->value ?? $ride->mode }}</td>
-                                <td>{{ $ride->status?->value ?? $ride->status }}</td>
+                                <td>{{ $ride->status?->label() ?? $ride->status }}</td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="empty-state">Поездок нет.</td></tr>

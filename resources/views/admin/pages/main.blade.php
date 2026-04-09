@@ -57,7 +57,7 @@
                                     <td>#{{ $ride->id }}</td>
                                     <td>{{ $ride->contact_phone ?? '-' }}</td>
                                     <td>{{ $ride->pickup_address }} -> {{ $ride->dropoff_address }}</td>
-                                    <td>{{ $ride->status?->value ?? $ride->status }}</td>
+                                    <td>{{ $ride->status?->label() ?? $ride->status }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="4" class="empty-state">Нет данных.</td></tr>

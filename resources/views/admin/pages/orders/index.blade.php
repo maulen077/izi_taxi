@@ -70,7 +70,7 @@
                                 <td>{{ $order->pickup_address }}</td>
                                 <td>{{ $order->dropoff_address }}</td>
                                 <td>{{ number_format((float) $order->price, 0, '.', ' ') }}</td>
-                                <td>{{ $order->status?->value ?? $order->status }}</td>
+                                <td>{{ $order->status?->label() ?? $order->status }}</td>
                                 <td>{{ $order->created_at?->format('d.m.Y H:i') }}</td>
                             </tr>
                         @empty

@@ -29,8 +29,8 @@
                                 <td>#{{ $ticket->id }}</td>
                                 <td>{{ $ticket->user?->name ?? '-' }}</td>
                                 <td>{{ $ticket->user?->phone ?? '-' }}</td>
-                                <td>{{ $ticket->subject?->value ?? $ticket->subject }}</td>
-                                <td>{{ $ticket->status?->value ?? $ticket->status }}</td>
+                                <td>{{ $ticket->subject?->label() ?? $ticket->subject }}</td>
+                                <td>{{ match($ticket->status) { 'open' => 'Открыта', 'resolved' => 'Решена', 'closed' => 'Закрыта', default => $ticket->status } }}</td>
                                 <td>{{ \Illuminate\Support\Str::limit($ticket->message, 80) }}</td>
                                 <td>{{ $ticket->created_at?->format('d.m.Y H:i') }}</td>
                             </tr>

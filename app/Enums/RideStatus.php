@@ -12,6 +12,19 @@ enum RideStatus: string
     case Completed = 'completed';
     case Cancelled = 'cancelled';
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::Searching => 'Поиск водителя',
+            self::Accepted => 'Водитель найден',
+            self::Arriving => 'Водитель едет',
+            self::PickedUp => 'Пассажир в машине',
+            self::InProgress => 'В пути',
+            self::Completed => 'Поездка завершена',
+            self::Cancelled => 'Поездка отменена',
+        };
+    }
+
     public function passengerLabel(): string
     {
         return match ($this) {
