@@ -24,6 +24,7 @@ class DriverProfile extends Model
         'car_number',
         'car_color',
         'car_tariff',
+        'accepts_delivery',
         'car_photo_front',
         'car_photo_side',
         'car_photo_interior',
@@ -41,6 +42,7 @@ class DriverProfile extends Model
         return [
             'car_year' => 'integer',
             'car_tariff' => TariffType::class,
+            'accepts_delivery' => 'boolean',
             'application_status' => ApplicationStatus::class,
             'submitted_at' => 'datetime',
             'approved_at' => 'datetime',

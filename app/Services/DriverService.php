@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Enums\DriverStatus;
+use App\Enums\OrderMode;
 use App\Enums\RideStatus;
+use App\Enums\TariffType;
 use App\Enums\UserRole;
 use App\Models\DriverLocation;
 use App\Models\DriverProfile;
@@ -26,17 +28,24 @@ class DriverService
             ]);
         }
 
-        $incomingOrder = Ride::query()
+        $activeRide = Ride::query()
             ->with(['passenger', 'driver.driverProfile'])
             ->whereIn('status', [
-                RideStatus::Searching->value,
                 RideStatus::Accepted->value,
                 RideStatus::Arriving->value,
                 RideStatus::PickedUp->value,
                 RideStatus::InProgress->value,
             ])
+            ->where('driver_id', $user->id)
+            ->latest()
+            ->first();
+
+        $incomingOrder = Ride::query()
+            ->with(['passenger', 'driver.driverProfile'])
+            ->where('status', RideStatus::Searching->value)
+            ->whereNull('driver_id')
             ->where(function ($query) use ($user) {
-                $query->whereNull('driver_id')->orWhere('driver_id', $user->id);
+                $this->applyRideEligibilityFilter($query, $user);
             })
             ->latest()
             ->first();
@@ -46,18 +55,6 @@ class DriverService
             ->where('status', RideStatus::Completed->value)
             ->whereDate('completed_at', today())
             ->sum('price');
-
-        $activeRide = Ride::query()
-            ->with(['passenger', 'driver.driverProfile'])
-            ->where('driver_id', $user->id)
-            ->whereIn('status', [
-                RideStatus::Accepted->value,
-                RideStatus::Arriving->value,
-                RideStatus::PickedUp->value,
-                RideStatus::InProgress->value,
-            ])
-            ->latest()
-            ->first();
 
         return [
             'user' => $this->mobileDataService->serializeUser($user->fresh(['driverProfile'])),
@@ -165,7 +162,7 @@ class DriverService
 
     public function acceptRide(User $user, Ride $ride): array
     {
-        $this->guardRideBelongsToDriverQueue($ride);
+        $this->guardRideBelongsToDriverQueue($user, $ride);
 
         $ride->forceFill([
             'driver_id' => $user->id,
@@ -180,7 +177,7 @@ class DriverService
 
     public function rejectRide(User $user, Ride $ride): array
     {
-        $this->guardRideBelongsToDriverQueue($ride);
+        $this->guardRideBelongsToDriverQueue($user, $ride);
 
         $user->forceFill([
             'trust_score' => max(0, $user->trust_score - 5),
@@ -257,11 +254,17 @@ class DriverService
         ];
     }
 
-    private function guardRideBelongsToDriverQueue(Ride $ride): void
+    private function guardRideBelongsToDriverQueue(User $user, Ride $ride): void
     {
-        if ($ride->status !== RideStatus::Searching) {
+        if ($ride->status !== RideStatus::Searching || $ride->driver_id !== null) {
             throw ValidationException::withMessages([
                 'ride' => 'Ride is not available for acceptance.',
+            ]);
+        }
+
+        if (! $this->driverCanAcceptRide($user, $ride)) {
+            throw ValidationException::withMessages([
+                'ride' => 'Ride is not available for this driver.',
             ]);
         }
     }
@@ -280,5 +283,45 @@ class DriverService
         return [
             'ride' => $this->mobileDataService->serializeRide($ride->fresh(['passenger', 'driver.driverProfile'])),
         ];
+    }
+
+    private function applyRideEligibilityFilter($query, User $user): void
+    {
+        $profile = $user->driverProfile()->first();
+        $carTariff = $profile?->car_tariff;
+        $acceptsDelivery = $profile?->accepts_delivery ?? true;
+
+        $query->where(function ($eligible) use ($carTariff, $acceptsDelivery) {
+            $eligible->where(function ($taxiQuery) use ($carTariff) {
+                $taxiQuery->where('mode', OrderMode::Taxi->value);
+
+                if ($carTariff instanceof TariffType) {
+                    $taxiQuery->where('tariff', $carTariff->value);
+                }
+            });
+
+            if ($acceptsDelivery) {
+                $eligible->orWhere('mode', OrderMode::Delivery->value);
+            }
+        });
+    }
+
+    private function driverCanAcceptRide(User $user, Ride $ride): bool
+    {
+        $profile = $user->driverProfile()->first();
+
+        if (! $profile) {
+            return $ride->mode !== OrderMode::Delivery;
+        }
+
+        if ($ride->mode === OrderMode::Delivery) {
+            return (bool) $profile->accepts_delivery;
+        }
+
+        if (! ($profile->car_tariff instanceof TariffType)) {
+            return true;
+        }
+
+        return ($ride->tariff instanceof TariffType ? $ride->tariff->value : (string) $ride->tariff) === $profile->car_tariff->value;
     }
 }

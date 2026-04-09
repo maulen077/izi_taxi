@@ -46,7 +46,9 @@
                                 <td>{{ $driver->driverProfile?->car_number ?? '-' }}</td>
                                 <td>{{ $driver->driver_status?->value ?? $driver->driver_status ?? '-' }}</td>
                                 <td class="actions">
-                                    <a href="{{ route('admin.driver_detail', $driver) }}">Детали</a>
+                                    <a href="{{ route('admin.driver_detail', $driver) }}" title="Открыть карточку водителя" aria-label="Открыть карточку водителя">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 18px; height: 18px;"><path d="M12 5c5.23 0 9.27 4.11 10.8 6.03a1.53 1.53 0 0 1 0 1.94C21.27 14.89 17.23 19 12 19S2.73 14.89 1.2 12.97a1.53 1.53 0 0 1 0-1.94C2.73 9.11 6.77 5 12 5zm0 2C7.89 7 4.52 10.14 3.28 12 4.52 13.86 7.89 17 12 17s7.48-3.14 8.72-5C19.48 10.14 16.11 7 12 7zm0 2.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5z" fill="currentColor"/></svg>
+                                    </a>
                                     <a href="{{ route('admin.driver_edit', $driver) }}">Изменить</a>
                                 </td>
                             </tr>

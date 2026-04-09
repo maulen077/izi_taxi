@@ -174,6 +174,7 @@ class MobileDataService
             'car_number' => $profile->car_number,
             'car_color' => $profile->car_color,
             'car_tariff' => $profile->car_tariff instanceof TariffType ? $profile->car_tariff->value : (string) $profile->car_tariff,
+            'accepts_delivery' => (bool) $profile->accepts_delivery,
             'car_photo_front' => $profile->car_photo_front,
             'car_photo_side' => $profile->car_photo_side,
             'car_photo_interior' => $profile->car_photo_interior,

@@ -28,6 +28,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('drivers', [DriverController::class, 'index'])->name('drivers');
         Route::get('drivers/{user}', [DriverController::class, 'detail'])->name('driver_detail');
         Route::get('drivers/{user}/edit', [DriverController::class, 'edit'])->name('driver_edit');
+        Route::put('drivers/{user}/capabilities', [DriverController::class, 'updateCapabilities'])->name('driver_capabilities_update');
         Route::put('drivers/{user}', [DriverController::class, 'update'])->name('driver_update');
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders');

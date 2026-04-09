@@ -78,6 +78,24 @@
                     <label for="car_color">Цвет</label>
                     <input id="car_color" name="car_color" type="text" value="{{ old('car_color', $user->driverProfile?->car_color) }}">
                 </div>
+                <div class="form-group">
+                    <label for="car_tariff">Тариф машины</label>
+                    <select id="car_tariff" name="car_tariff">
+                        @foreach($tariffOptions as $tariff)
+                            <option value="{{ $tariff->value }}" @selected(old('car_tariff', $user->driverProfile?->car_tariff?->value ?? $user->driverProfile?->car_tariff ?? 'economy') === $tariff->value)>
+                                {{ ucfirst($tariff->value) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="accepts_delivery">Доставка</label>
+                    <input type="hidden" name="accepts_delivery" value="0">
+                    <select id="accepts_delivery" name="accepts_delivery">
+                        <option value="1" @selected((string) old('accepts_delivery', (int) ($user->driverProfile?->accepts_delivery ?? true)) === '1')>Включена</option>
+                        <option value="0" @selected((string) old('accepts_delivery', (int) ($user->driverProfile?->accepts_delivery ?? true)) === '0')>Отключена</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-actions">
